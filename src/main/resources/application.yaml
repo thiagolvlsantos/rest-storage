@@ -1,0 +1,50 @@
+# OpenAPI params
+springdoc:
+  api-docs:
+    path: /swagger
+  swagger-ui:
+    path: /swagger/ui
+    operationsSorter: alpha # Sorting endpoints alphabetically
+    tagsSorter: alpha       # Sorting tags alphabetically
+
+# Git-Transactions properties
+gitt:
+  repository:
+    # General properties
+    user: thiagolvlsantos
+    password: ${GIT_TOKEN:XYZ}
+    # tags properties
+    tags:
+      read: data/read/tags
+      write: data/write/tags
+      remote: https://github.com/thiagolvlsantos/git-example.git
+    # labels properties
+    labels:
+      read: data/read/labels
+      write: data/write/labels
+      remote: https://github.com/thiagolvlsantos/git-example.git
+    # Project properties
+    projects:
+      read: data/read/projects
+      write: data/write/projects
+      remote: https://github.com/thiagolvlsantos/git-example.git
+    # Product properties
+    products:
+      read: data/read/products
+      write: data/write/products
+      remote: https://github.com/thiagolvlsantos/git-example.git
+    # Template properties
+    templates:
+      read: data/read/templates
+      write: data/write/templates
+      remote: https://github.com/thiagolvlsantos/git-example.git
+    # Target properties
+    targets:
+      read: data/read/targets
+      write: data/write/targets
+      remote: https://github.com/thiagolvlsantos/git-example.git
+    # Deployment properties
+    deployments:
+      read: data/read/deployments
+      write: data/write/deployments
+      remote: https://github.com/thiagolvlsantos/git-example.git
