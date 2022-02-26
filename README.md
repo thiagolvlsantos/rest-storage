@@ -22,6 +22,10 @@ Include latest version [![Maven Central](https://maven-badges.herokuapp.com/mave
 		</dependency>
 ```
 
+## Configuration
+
+TODO
+
 ## Endpoints
 
 TODO
