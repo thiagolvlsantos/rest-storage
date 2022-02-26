@@ -24,11 +24,11 @@ Include latest version [![Maven Central](https://maven-badges.herokuapp.com/mave
 
 ## Configuration
 
-TODO
+TODO (SpringDOC + application.xml)
 
 ## Endpoints
 
-TODO
+TODO (OpenApi)
 
 ## Build
 
