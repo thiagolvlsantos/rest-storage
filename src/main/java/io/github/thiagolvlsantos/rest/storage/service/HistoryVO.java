@@ -1,5 +1,7 @@
 package io.github.thiagolvlsantos.rest.storage.service;
 
+import java.io.Serializable;
+
 import org.eclipse.jgit.lib.PersonIdent;
 
 import lombok.AllArgsConstructor;
@@ -13,7 +15,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class HistoryVO {
+@SuppressWarnings("serial")
+public class HistoryVO implements Serializable {
 	private String id;
 	private PersonIdent authorIdent;
 	private PersonIdent committerIdent;

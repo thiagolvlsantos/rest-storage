@@ -14,6 +14,7 @@ import io.github.thiagolvlsantos.file.storage.util.repository.IObjectMapper;
 import io.github.thiagolvlsantos.file.storage.util.repository.ResourceVO;
 import io.github.thiagolvlsantos.git.transactions.GitRepo;
 import io.github.thiagolvlsantos.git.transactions.GitServices;
+import io.github.thiagolvlsantos.git.transactions.exceptions.GitTransactionsException;
 import io.github.thiagolvlsantos.git.transactions.read.GitCommit;
 import io.github.thiagolvlsantos.git.transactions.read.GitRead;
 import io.github.thiagolvlsantos.git.transactions.write.GitWrite;
@@ -27,7 +28,11 @@ public abstract class AbstractService<T> {
 
 	// +---
 	public String group() {
-		return AnnotationUtils.findAnnotation(getClass(), GitRepo.class).value();
+		GitRepo repo = AnnotationUtils.findAnnotation(getClass(), GitRepo.class);
+		if (repo == null) {
+			throw new GitTransactionsException("Repository location not found.", null);
+		}
+		return repo.value();
 	}
 
 	private File readDirectory() {
