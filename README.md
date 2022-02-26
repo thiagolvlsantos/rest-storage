@@ -85,7 +85,7 @@ gitt:
 
 According to this setup, after server start, the OpenApi interface will be available at [http://localhost:8080/swagger](http://localhost:8080/swagger) and Swagger UI at [http://localhost:8080/swagger/ui](http://localhost:8080/swagger/ui).
 
-![Auto-generated API](doc/img/swagger-ui.jpg =x600)
+<img alt="Auto-generated API" src="doc/img/swagger-ui.jpg" width="600">
 
 ## Build
 
