@@ -81,9 +81,9 @@ gitt:
       remote: https://github.com/thiagolvlsantos/git-example.git
 ```
 
-##Endpoints
+## Endpoints
 
-According to this setup, after server start, the OpenApi interface will be available at http://localhost:8080/swagger and Swagger interface will be available at http://localhost:8080/swagger/ui.
+According to this setup, after server start, the OpenApi interface will be available at [http://localhost:8080/swagger](http://localhost:8080/swagger) and Swagger UI at [http://localhost:8080/swagger/ui](http://localhost:8080/swagger/ui).
 
 ## Build
 
