@@ -85,6 +85,8 @@ gitt:
 
 According to this setup, after server start, the OpenApi interface will be available at [http://localhost:8080/swagger](http://localhost:8080/swagger) and Swagger UI at [http://localhost:8080/swagger/ui](http://localhost:8080/swagger/ui).
 
+TODO: endpoint image.
+
 ## Build
 
 Localy, from this root directory call Maven commands or `bin/<script name>` at our will.
