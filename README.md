@@ -22,13 +22,68 @@ Include latest version [![Maven Central](https://maven-badges.herokuapp.com/mave
 		</dependency>
 ```
 
-## Configuration
+## Add `@EnableRestStorage` to you app.
 
-TODO (SpringDOC + application.xml)
+```java
+...
+@EnableRestStorage
+public class Application {
+	...main(String[] args) {...}
+}
+```
 
-## Endpoints
+```java
+// ...
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+@FileRepo(Tag.REPO)
+public class Tag extends FileObjectVersionedAuditable {
 
-TODO (OpenApi)
+	public static final String REPO = "tags";
+
+	@Schema(description = "Tags's name.", example = "openshift", required = true)
+	@NotNull
+	@NotBlank
+	@Size(min = 1)
+	@FileKey
+	private String name;
+
+	@Schema(description = "Tag's description.", example = "Tag for openshift items.")
+	private String description;
+}
+```
+
+Example using YAMLs configuration file.
+
+```yaml
+# OpenAPI params
+springdoc:
+  api-docs:
+    path: /swagger
+  swagger-ui:
+    path: /swagger/ui
+    operationsSorter: alpha # Sorting endpoints alphabetically
+    tagsSorter: alpha       # Sorting tags alphabetically
+
+# Git-Transactions properties
+gitt:
+  repository:
+    # General properties
+    user: ${YOUR_USER}
+    password: ${YOUR_TOKEN}
+    # tags properties
+    tags:
+      read: data/read/tags
+      write: data/write/tags
+      remote: https://github.com/thiagolvlsantos/git-example.git
+```
+
+##Endpoints
+
+According to this setup, after server start, the OpenApi interface will be available at http://localhost:8080/swagger and Swagger interface will be available at http://localhost:8080/swagger/ui.
 
 ## Build
 
