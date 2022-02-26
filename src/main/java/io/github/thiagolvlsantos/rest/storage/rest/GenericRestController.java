@@ -281,7 +281,7 @@ public class GenericRestController {
 	@GetMapping(value = "/{entity}/list", //
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
-	public ResponseEntity<List<? extends Object>> list(//
+	public ResponseEntity<List<Object>> list(//
 			@Parameter(description = "Entity type.", required = true, //
 					schema = @Schema(implementation = String.class)) //
 			@Valid @PathVariable("entity") String entity, //
@@ -303,7 +303,7 @@ public class GenericRestController {
 			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
 			@RequestParam(name = "at", required = false) LocalDateTime at //
 	) {
-		RestListEvent<List<? extends Object>> re = new RestListEvent<>(this);
+		RestListEvent<List<Object>> re = new RestListEvent<>(this);
 		re.setEntity(entity);
 		re.setFilter(filter);
 		re.setPaging(paging);
