@@ -11,7 +11,7 @@
 
 	<groupId>io.github.thiagolvlsantos</groupId>
 	<artifactId>rest-storage</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2-SNAPSHOT</version>
 
 	<name>${project.artifactId}</name>
 	<description>A generic endpoint for storage in Spring Boot.</description>
@@ -59,7 +59,7 @@
 		<url>https://${project.domain.name}/${project.owner.login}/${project.artifactId}.git</url>
 		<connection>scm:git:git://${project.domain.name}/${project.owner.login}/${project.artifactId}.git</connection>
 		<developerConnection>scm:git:git@${project.domain.name}:${project.owner.login}/${project.artifactId}.git</developerConnection>
-		<tag>rest-storage-0.0.1</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<url>https://${project.domain.name}/${project.owner.login}/${project.artifactId}</url>
