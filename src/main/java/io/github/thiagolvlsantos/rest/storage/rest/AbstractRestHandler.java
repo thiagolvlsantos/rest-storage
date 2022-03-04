@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.thiagolvlsantos.file.storage.FileParams;
 import io.github.thiagolvlsantos.file.storage.annotations.UtilAnnotations;
+import io.github.thiagolvlsantos.file.storage.exceptions.FileStorageException;
 import io.github.thiagolvlsantos.file.storage.util.repository.ResourceVO;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestCountEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestDeleteEvent;
@@ -113,8 +114,8 @@ public abstract class AbstractRestHandler<P, Q> implements ApplicationListener<A
 		String keys = UtilAnnotations.getKeysChain(type, candidate);
 		String name = event.getName();
 		if (!name.equalsIgnoreCase(keys)) {
-			throw new IllegalArgumentException(
-					"Content name '" + keys + "' does not match the received path '" + name + "'.");
+			throw new FileStorageException(
+					"Content name '" + keys + "' does not match the received path '" + name + "'.", null);
 		}
 		event.setResult(service.update(candidate));
 	}
