@@ -90,7 +90,7 @@ public abstract class AbstractRestHandler<P, Q> implements ApplicationListener<A
 			} else if (event instanceof RestHistoryNameEvent) {
 				historyName((RestHistoryNameEvent<List<HistoryVO>>) event);
 			} else if (event instanceof RestHistoryResourceEvent) {
-				historyResource((RestHistoryResourceEvent<List<HistoryVO>>) event);
+				historyResources((RestHistoryResourceEvent<List<HistoryVO>>) event);
 			}
 		}
 	}
@@ -197,7 +197,7 @@ public abstract class AbstractRestHandler<P, Q> implements ApplicationListener<A
 	}
 
 	@SneakyThrows
-	protected void historyResource(RestHistoryResourceEvent<List<HistoryVO>> event) {
-		event.setResult(service.history(FileParams.of(event.getName()), event.getPath(), event.getPaging()));
+	protected void historyResources(RestHistoryResourceEvent<List<HistoryVO>> event) {
+		event.setResult(service.historyResources(FileParams.of(event.getName()), event.getPath(), event.getPaging()));
 	}
 }
