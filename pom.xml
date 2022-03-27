@@ -49,7 +49,7 @@
 
 		<!-- DEPENDENCIES -->
 		<git-transactions.version>0.0.4</git-transactions.version>
-		<file-storage.version>0.0.4</file-storage.version>
+		<file-storage.version>0.0.5-SNAPSHOT</file-storage.version>
 		<json-predicate.version>0.0.7</json-predicate.version>
 		<orika-core.version>1.5.4</orika-core.version>
 		<springdoc-openapi-ui.version>1.5.10</springdoc-openapi-ui.version>

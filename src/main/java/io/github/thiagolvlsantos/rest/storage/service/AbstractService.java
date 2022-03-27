@@ -147,51 +147,6 @@ public abstract class AbstractService<T> {
 	protected void afterDeleteError(FileParams keys, Throwable e) {
 	}
 
-	@GitRead
-	public WrapperVO<Long> count(String filter, String paging, @GitCommit String commit, @GitCommit Long at) {
-		try {
-			beforeCount(filter, paging, commit, at);
-			WrapperVO<Long> result = new WrapperVO<>(repository().count(readDirectory(), filter, paging));
-			afterCountSuccess(filter, paging, commit, at, result);
-			return result;
-		} catch (Throwable e) {
-			afterCountError(filter, paging, commit, at, e);
-			throw e;
-		}
-	}
-
-	protected void beforeCount(String filter, String paging, String commit, Long at) {
-	}
-
-	protected void afterCountSuccess(String filter, String paging, String commit, Long at, WrapperVO<Long> result) {
-	}
-
-	protected void afterCountError(String filter, String paging, String commit, Long at, Throwable e) {
-	}
-
-	@GitRead
-	public List<T> list(String filter, String paging, String sorting, @GitCommit String commit, @GitCommit Long at) {
-		try {
-			beforeList(filter, paging, sorting, commit, at);
-			List<T> result = repository().list(readDirectory(), filter, paging, sorting);
-			afterListSuccess(filter, paging, sorting, commit, at, result);
-			return result;
-		} catch (Throwable e) {
-			afterListError(filter, paging, sorting, commit, at, e);
-			throw e;
-		}
-	}
-
-	protected void beforeList(String filter, String paging, String sorting, String commit, Long at) {
-	}
-
-	protected void afterListSuccess(String filter, String paging, String sorting, String commit, Long at,
-			List<T> result) {
-	}
-
-	protected void afterListError(String filter, String paging, String sorting, String commit, Long at, Throwable e) {
-	}
-
 	// +------------- PROPERTY METHODS ------------------+
 
 	@GitWrite
@@ -469,5 +424,79 @@ public abstract class AbstractService<T> {
 	}
 
 	protected void afterHistoryResourcesError(FileParams keys, String path, String paging, Throwable e) {
+	}
+
+	// +------------- COLLECTION METHODS ------------------+
+
+	@GitRead
+	public WrapperVO<Long> count(String filter, String paging, @GitCommit String commit, @GitCommit Long at) {
+		try {
+			beforeCount(filter, paging, commit, at);
+			WrapperVO<Long> result = new WrapperVO<>(repository().count(readDirectory(), filter, paging));
+			afterCountSuccess(filter, paging, commit, at, result);
+			return result;
+		} catch (Throwable e) {
+			afterCountError(filter, paging, commit, at, e);
+			throw e;
+		}
+	}
+
+	protected void beforeCount(String filter, String paging, String commit, Long at) {
+	}
+
+	protected void afterCountSuccess(String filter, String paging, String commit, Long at, WrapperVO<Long> result) {
+	}
+
+	protected void afterCountError(String filter, String paging, String commit, Long at, Throwable e) {
+	}
+
+	@GitRead
+	public List<T> list(String filter, String paging, String sorting, @GitCommit String commit, @GitCommit Long at) {
+		try {
+			beforeList(filter, paging, sorting, commit, at);
+			List<T> result = repository().list(readDirectory(), filter, paging, sorting);
+			afterListSuccess(filter, paging, sorting, commit, at, result);
+			return result;
+		} catch (Throwable e) {
+			afterListError(filter, paging, sorting, commit, at, e);
+			throw e;
+		}
+	}
+
+	protected void beforeList(String filter, String paging, String sorting, String commit, Long at) {
+	}
+
+	protected void afterListSuccess(String filter, String paging, String sorting, String commit, Long at,
+			List<T> result) {
+	}
+
+	protected void afterListError(String filter, String paging, String sorting, String commit, Long at, Throwable e) {
+	}
+
+	@GitRead
+	public Map<String, Map<String, Object>> properties(FileParams names, String filter, String paging, String sorting,
+			@GitCommit String commit, @GitCommit Long at) {
+		Map<String, Map<String, Object>> result;
+		try {
+			beforeProperties(names, filter, paging, sorting, commit, at);
+			result = repository().properties(readDirectory(), names, filter, paging, sorting);
+			afterPropertiesSuccess(names, filter, paging, sorting, commit, at, result);
+			return result;
+		} catch (Throwable e) {
+			afterPropertiesError(names, filter, paging, sorting, commit, at, e);
+			throw e;
+		}
+	}
+
+	protected void beforeProperties(FileParams names, String filter, String paging, String sorting, String commit,
+			Long at) {
+	}
+
+	protected void afterPropertiesSuccess(FileParams names, String filter, String paging, String sorting, String commit,
+			Long at, Map<String, Map<String, Object>> result) {
+	}
+
+	protected void afterPropertiesError(FileParams names, String filter, String paging, String sorting, String commit,
+			Long at, Throwable e) {
 	}
 }

@@ -12,12 +12,13 @@ import io.github.thiagolvlsantos.file.storage.FileParams;
 import io.github.thiagolvlsantos.file.storage.annotations.UtilAnnotations;
 import io.github.thiagolvlsantos.file.storage.exceptions.FileStorageException;
 import io.github.thiagolvlsantos.file.storage.util.repository.ResourceVO;
-import io.github.thiagolvlsantos.rest.storage.rest.basic.RestCountEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestDeleteEvent;
-import io.github.thiagolvlsantos.rest.storage.rest.basic.RestListEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestReadEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestSaveEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestUpdateEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.collection.RestCountEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.collection.RestListEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.collection.RestListPropertiesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryNameEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryResourceEvent;
@@ -64,10 +65,6 @@ public abstract class AbstractRestHandler<P, Q> implements ApplicationListener<A
 				update((RestUpdateEvent<P>) event);
 			} else if (event instanceof RestDeleteEvent) {
 				delete((RestDeleteEvent<P>) event);
-			} else if (event instanceof RestCountEvent) {
-				count((RestCountEvent<WrapperVO<Long>>) event);
-			} else if (event instanceof RestListEvent) {
-				list((RestListEvent<List<P>>) event);
 			} else if (event instanceof RestSetPropertyEvent) {
 				setProperty((RestSetPropertyEvent<P>) event);
 			} else if (event instanceof RestGetPropertyEvent) {
@@ -92,6 +89,12 @@ public abstract class AbstractRestHandler<P, Q> implements ApplicationListener<A
 				historyName((RestHistoryNameEvent<List<HistoryVO>>) event);
 			} else if (event instanceof RestHistoryResourceEvent) {
 				historyResources((RestHistoryResourceEvent<List<HistoryVO>>) event);
+			} else if (event instanceof RestCountEvent) {
+				count((RestCountEvent<WrapperVO<Long>>) event);
+			} else if (event instanceof RestListEvent) {
+				list((RestListEvent<List<P>>) event);
+			} else if (event instanceof RestListPropertiesEvent) {
+				properties((RestListPropertiesEvent<Map<String, Map<String, Object>>>) event);
 			}
 		}
 	}
@@ -123,17 +126,6 @@ public abstract class AbstractRestHandler<P, Q> implements ApplicationListener<A
 	@SneakyThrows
 	protected void delete(RestDeleteEvent<P> event) {
 		event.setResult(service.delete(FileParams.of(event.getName())));
-	}
-
-	@SneakyThrows
-	protected void count(RestCountEvent<WrapperVO<Long>> event) {
-		event.setResult(service.count(event.getFilter(), event.getPaging(), event.getCommit(), event.getAt()));
-	}
-
-	@SneakyThrows
-	protected void list(RestListEvent<List<P>> event) {
-		event.setResult(service.list(event.getFilter(), event.getPaging(), event.getSorting(), event.getCommit(),
-				event.getAt()));
 	}
 
 	@SneakyThrows
@@ -200,5 +192,22 @@ public abstract class AbstractRestHandler<P, Q> implements ApplicationListener<A
 	@SneakyThrows
 	protected void historyResources(RestHistoryResourceEvent<List<HistoryVO>> event) {
 		event.setResult(service.historyResources(FileParams.of(event.getName()), event.getPath(), event.getPaging()));
+	}
+
+	@SneakyThrows
+	protected void count(RestCountEvent<WrapperVO<Long>> event) {
+		event.setResult(service.count(event.getFilter(), event.getPaging(), event.getCommit(), event.getAt()));
+	}
+
+	@SneakyThrows
+	protected void list(RestListEvent<List<P>> event) {
+		event.setResult(service.list(event.getFilter(), event.getPaging(), event.getSorting(), event.getCommit(),
+				event.getAt()));
+	}
+
+	@SneakyThrows
+	protected void properties(RestListPropertiesEvent<Map<String, Map<String, Object>>> event) {
+		event.setResult(service.properties(FileParams.of(event.getProperties(), ","), event.getFilter(),
+				event.getPaging(), event.getSorting(), event.getCommit(), event.getAt()));
 	}
 }

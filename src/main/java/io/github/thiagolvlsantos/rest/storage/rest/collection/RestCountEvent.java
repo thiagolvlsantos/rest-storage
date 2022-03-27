@@ -1,4 +1,4 @@
-package io.github.thiagolvlsantos.rest.storage.rest.basic;
+package io.github.thiagolvlsantos.rest.storage.rest.collection;
 
 import io.github.thiagolvlsantos.rest.storage.rest.AbstractRestEvent;
 import lombok.Getter;
@@ -7,15 +7,15 @@ import lombok.Setter;
 @Getter
 @Setter
 @SuppressWarnings("serial")
-public class RestListEvent<T> extends AbstractRestEvent<T> {
+public class RestCountEvent<T> extends AbstractRestEvent<T> {
 
+	private String name;
 	private String filter;
 	private String paging;
-	private String sorting;
 	private String commit;
 	private Long at;
 
-	public RestListEvent(Object source) {
+	public RestCountEvent(Object source) {
 		super(source);
 	}
 }

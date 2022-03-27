@@ -30,12 +30,13 @@ import org.springframework.web.bind.annotation.RestController;
 import io.github.thiagolvlsantos.file.storage.annotations.UtilAnnotations;
 import io.github.thiagolvlsantos.file.storage.util.repository.ResourceVO;
 import io.github.thiagolvlsantos.rest.storage.error.ApiFailure;
-import io.github.thiagolvlsantos.rest.storage.rest.basic.RestCountEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestDeleteEvent;
-import io.github.thiagolvlsantos.rest.storage.rest.basic.RestListEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestReadEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestSaveEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestUpdateEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.collection.RestCountEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.collection.RestListEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.collection.RestListPropertiesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryNameEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryResourceEvent;
@@ -748,6 +749,55 @@ public class GenericRestController {
 		re.setName(name);
 		re.setPath(path);
 		re.setPaging(paging);
+		publisher.publishEvent(re);
+		return handle(re);
+	}
+
+	// +------------- COLLECTION METHODS ------------------+
+	@Operation(summary = "Properties for entities mapping.", tags = { TAG })
+	@ApiResponses(value = { //
+			@ApiResponse(responseCode = "200", description = "On success request.", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							schema = @Schema(implementation = Object.class)) }), //
+			@ApiResponse(responseCode = "4XX", description = "On read errors.", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							schema = @Schema(implementation = ApiFailure.class)) }) //
+	})
+	@GetMapping(value = "/{entity}/" + PATH_PROPERTIES, //
+			produces = { MediaType.APPLICATION_JSON_VALUE } //
+	)
+	public ResponseEntity<Map<String, Map<String, Object>>> properties(//
+			@Parameter(description = "Object type.", required = true) //
+			@Valid @PathVariable(required = true) String entity, //
+
+			@Parameter(description = "Property names. Separated with ','.") //
+			@Nullable @RequestParam(name = "properties", required = false) String properties, //
+
+			@Parameter(description = "Filter predicate with pattern described at https://github.com/thiagolvlsantos/json-predicate.", //
+					example = "{\"content.data\": {\"$contains\": \"html\"}}") //
+			@Nullable @RequestParam(name = "filter", required = false) String filter, //
+
+			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
+			@Nullable @RequestParam(name = "paging", required = false) String paging, //
+
+			@Parameter(description = "Sorting information.", example = "{ \"property\":\"metadata.path\", \"sort\":\"desc\" }") //
+			@Nullable @RequestParam(name = "sorting", required = false) String sorting, //
+
+			@Parameter(description = "Commit id.") //
+			@Nullable @RequestParam(name = "commit", required = false) String commit, //
+
+			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
+			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
+			@RequestParam(name = "at", required = false) LocalDateTime at //
+	) {
+		RestListPropertiesEvent<Map<String, Map<String, Object>>> re = new RestListPropertiesEvent<>(this);
+		re.setEntity(entity);
+		re.setProperties(properties);
+		re.setFilter(filter);
+		re.setPaging(paging);
+		re.setSorting(sorting);
+		re.setCommit(commit);
+		re.setAt(timestamp(at));
 		publisher.publishEvent(re);
 		return handle(re);
 	}
