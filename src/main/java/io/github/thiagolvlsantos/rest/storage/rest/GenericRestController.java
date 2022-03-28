@@ -30,18 +30,19 @@ import org.springframework.web.bind.annotation.RestController;
 import io.github.thiagolvlsantos.file.storage.annotations.UtilAnnotations;
 import io.github.thiagolvlsantos.file.storage.util.repository.ResourceVO;
 import io.github.thiagolvlsantos.rest.storage.error.ApiFailure;
+import io.github.thiagolvlsantos.rest.storage.rest.basic.RestCountEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestDeleteEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.basic.RestListEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestReadEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestSaveEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestUpdateEvent;
-import io.github.thiagolvlsantos.rest.storage.rest.collection.RestCountEvent;
-import io.github.thiagolvlsantos.rest.storage.rest.collection.RestListEvent;
-import io.github.thiagolvlsantos.rest.storage.rest.collection.RestListPropertiesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryNameEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryResourceEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.properties.RestGetPropertyEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.properties.RestListPropertiesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.properties.RestPropertiesEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.properties.RestSetPropertiesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.properties.RestSetPropertyEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestCountResourcesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestDeleteResourceEvent;
@@ -63,7 +64,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping(GenericRestController.API_URL)
-@Tag(name = GenericRestController.TAG, description = "The all in one API. <p> <b>IMPORTANT</b>: All names have pattern: 'string(;string)*'.</p>")
 @Slf4j
 public class GenericRestController {
 
@@ -72,6 +72,23 @@ public class GenericRestController {
 	public static final String PATH_HISTORY = "history";
 
 	public static final String TAG = "All";
+	public static final String TAG_DESCRIPTION = "<p> <b>IMPORTANT</b>: All names have pattern: 'string(;string)*'.</p>";
+
+	public static final String TAG_BASIC = "Basic";
+	public static final String TAG_BASIC_DESCRIPTION = "Basic operations. " + TAG_DESCRIPTION;
+
+	public static final String TAG_PROPERTIES = "Properties";
+	public static final String TAG_PROPERTIES_DESCRIPTION = "Properties operations." + TAG_DESCRIPTION;
+
+	public static final String TAG_RESOURCES = "Resources";
+	public static final String TAG_RESOURCES_DESCRIPTION = "Resources operations." + TAG_DESCRIPTION;
+
+	public static final String TAG_HISTORY = "History";
+	public static final String TAG_HISTORY_DESCRIPTION = "History oprations." + TAG_DESCRIPTION;
+
+	public static final String TAG_COLLECTION = "Collections";
+	public static final String TAG_COLLECTION_DESCRIPTION = "Collections operations." + TAG_DESCRIPTION;
+
 	public static final String API_URL = "/";
 
 	private @Autowired ApplicationEventPublisher publisher;
@@ -88,7 +105,8 @@ public class GenericRestController {
 	// EXAMPLE:
 	// https://www.dariawan.com/tutorials/spring/documenting-spring-boot-rest-api-springdoc-openapi-3/
 
-	@Operation(summary = "Creates an entity with the given information.", tags = { TAG })
+	@Operation(summary = "Creates an entity with the given information.", tags = { TAG_BASIC })
+	@Tag(name = GenericRestController.TAG_BASIC, description = TAG_BASIC_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "201", description = "On creation success.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -121,7 +139,8 @@ public class GenericRestController {
 		return ResponseEntity.created(uri).body(response);
 	}
 
-	@Operation(summary = "Reads the entity data by the given name.", tags = { TAG })
+	@Operation(summary = "Reads the entity data by the given name.", tags = { TAG_BASIC })
+	@Tag(name = GenericRestController.TAG_BASIC, description = TAG_BASIC_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "On success request.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -169,7 +188,8 @@ public class GenericRestController {
 		return ResponseEntity.ok(response);
 	}
 
-	@Operation(summary = "Updates the entity with the given information.", tags = { TAG })
+	@Operation(summary = "Updates the entity with the given information.", tags = { TAG_BASIC })
+	@Tag(name = GenericRestController.TAG_BASIC, description = TAG_BASIC_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -202,7 +222,8 @@ public class GenericRestController {
 		return handle(re);
 	}
 
-	@Operation(summary = "Deletes an entity by the given name.", tags = { TAG })
+	@Operation(summary = "Deletes an entity by the given name.", tags = { TAG_BASIC })
+	@Tag(name = GenericRestController.TAG_BASIC, description = TAG_BASIC_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "On success request.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -229,95 +250,10 @@ public class GenericRestController {
 		return handle(re);
 	}
 
-	@Operation(summary = "Count objects.", tags = { TAG })
-	@ApiResponses(value = { //
-			@ApiResponse(responseCode = "200", description = "On success request.", //
-					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
-							schema = @Schema(implementation = WrapperVO.class)) }), //
-			@ApiResponse(responseCode = "4XX", description = "On read errors.", //
-					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
-							schema = @Schema(implementation = ApiFailure.class)) }) //
-	})
-	@GetMapping(value = "/{entity}/count", //
-			produces = { MediaType.APPLICATION_JSON_VALUE } //
-	)
-	public ResponseEntity<WrapperVO<Long>> count(//
-			@Parameter(description = "Entity type.", required = true, //
-					schema = @Schema(implementation = String.class)) //
-			@Valid @PathVariable("entity") String entity, //
-
-			@Parameter(description = "Filter predicate with pattern described at https://github.com/thiagolvlsantos/json-predicate.", //
-					example = "{\"name\": {\"$contains\": \"k8s\"}}") //
-			@Nullable @RequestParam(name = "filter", required = false) String filter, //
-
-			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
-			@Nullable @RequestParam(name = "paging", required = false) String paging, //
-
-			@Parameter(description = "Commit id.") //
-			@Nullable @RequestParam(name = "commit", required = false) String commit, //
-
-			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
-			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = "at", required = false) LocalDateTime at //
-	) {
-		RestCountEvent<WrapperVO<Long>> re = new RestCountEvent<>(this);
-		re.setEntity(entity);
-		re.setFilter(filter);
-		re.setPaging(paging);
-		re.setCommit(commit);
-		re.setAt(timestamp(at));
-		publisher.publishEvent(re);
-		return handle(re);
-	}
-
-	@Operation(summary = "List objects.", tags = { TAG })
-	@ApiResponses(value = { //
-			@ApiResponse(responseCode = "200", description = "", //
-					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
-							array = @ArraySchema(schema = @Schema(implementation = Object.class))) }), //
-			@ApiResponse(responseCode = "4XX", description = "On read errors.", //
-					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
-							schema = @Schema(implementation = ApiFailure.class)) }) //
-	})
-	@GetMapping(value = "/{entity}/list", //
-			produces = { MediaType.APPLICATION_JSON_VALUE } //
-	)
-	public ResponseEntity<List<Object>> list(//
-			@Parameter(description = "Entity type.", required = true, //
-					schema = @Schema(implementation = String.class)) //
-			@Valid @PathVariable("entity") String entity, //
-
-			@Parameter(description = "Filter predicate with pattern described at https://github.com/thiagolvlsantos/json-predicate.", //
-					example = "{\"name\": {\"$contains\": \"k8s\"}}") //
-			@Nullable @RequestParam(name = "filter", required = false) String filter, //
-
-			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
-			@Nullable @RequestParam(name = "paging", required = false) String paging, //
-
-			@Parameter(description = "Sorting information.", example = "{ \"property\":\"parent.name\", \"sort\":\"asc\", \"nullsFirst\":true }") //
-			@Nullable @RequestParam(name = "sorting", required = false) String sorting, //
-
-			@Parameter(description = "Commit id.") //
-			@Nullable @RequestParam(name = "commit", required = false) String commit, //
-
-			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
-			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = "at", required = false) LocalDateTime at //
-	) {
-		RestListEvent<List<Object>> re = new RestListEvent<>(this);
-		re.setEntity(entity);
-		re.setFilter(filter);
-		re.setPaging(paging);
-		re.setSorting(sorting);
-		re.setCommit(commit);
-		re.setAt(timestamp(at));
-		publisher.publishEvent(re);
-		return handle(re);
-	}
-
 	// +------------- PROPERTY METHODS ------------------+
 
-	@Operation(summary = "Updates an object property with the given information.", tags = { TAG })
+	@Operation(summary = "Updates an object property with the given information.", tags = { TAG_PROPERTIES })
+	@Tag(name = GenericRestController.TAG_PROPERTIES, description = TAG_PROPERTIES_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -352,7 +288,54 @@ public class GenericRestController {
 		return handle(re);
 	}
 
-	@Operation(summary = "Reads an object property by the given name.", tags = { TAG })
+	@Operation(summary = "Updates a property of all objects with the given information.", tags = { TAG_PROPERTIES })
+	@Tag(name = GenericRestController.TAG_PROPERTIES, description = TAG_PROPERTIES_DESCRIPTION)
+	@ApiResponses(value = { //
+			@ApiResponse(responseCode = "200", description = "", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							array = @ArraySchema(schema = @Schema(implementation = Object.class))) }), //
+			@ApiResponse(responseCode = "4XX", description = "On update errors.", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							schema = @Schema(implementation = ApiFailure.class)) }) //
+	})
+	@PatchMapping(value = "/{entity}/" + PATH_PROPERTIES + "/{property}", //
+			consumes = { MediaType.APPLICATION_JSON_VALUE }, //
+			produces = { MediaType.APPLICATION_JSON_VALUE }//
+	)
+	public ResponseEntity<List<Object>> setProperty(//
+			@Parameter(description = "Object type.", required = true) //
+			@Valid @PathVariable(required = true) String entity, //
+
+			@Parameter(description = "Object property.", required = true) //
+			@Valid @PathVariable(required = true) String property, //
+
+			@Parameter(description = "Property data as String.", required = true) //
+			@Valid @RequestBody(required = true) String dataAsString, //
+
+			@Parameter(description = "Filter predicate with pattern described at https://github.com/thiagolvlsantos/json-predicate.", //
+					example = "{\"name\": {\"$contains\": \"k8s\"}}") //
+			@Nullable @RequestParam(name = "filter", required = false) String filter, //
+
+			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
+			@Nullable @RequestParam(name = "paging", required = false) String paging, //
+
+			@Parameter(description = "Sorting information.", example = "{ \"property\":\"parent.name\", \"sort\":\"asc\", \"nullsFirst\":true }") //
+			@Nullable @RequestParam(name = "sorting", required = false) String sorting //
+
+	) {
+		RestSetPropertiesEvent<List<Object>> re = new RestSetPropertiesEvent<>(this);
+		re.setEntity(entity);
+		re.setProperty(property);
+		re.setDataAsString(dataAsString);
+		re.setFilter(filter);
+		re.setPaging(paging);
+		re.setSorting(sorting);
+		publisher.publishEvent(re);
+		return handle(re);
+	}
+
+	@Operation(summary = "Reads an object property by the given name.", tags = { TAG_PROPERTIES })
+	@Tag(name = GenericRestController.TAG_PROPERTIES, description = TAG_PROPERTIES_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "On success request.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -391,7 +374,8 @@ public class GenericRestController {
 		return handle(re);
 	}
 
-	@Operation(summary = "Properties mapping.", tags = { TAG })
+	@Operation(summary = "Properties mapping.", tags = { TAG_PROPERTIES })
+	@Tag(name = GenericRestController.TAG_PROPERTIES, description = TAG_PROPERTIES_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "On success request.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -432,7 +416,8 @@ public class GenericRestController {
 
 	// +------------- RESOURCE METHODS ------------------+
 
-	@Operation(summary = "Creates an object resource with the given information.", tags = { TAG })
+	@Operation(summary = "Creates an object resource with the given information.", tags = { TAG_RESOURCES })
+	@Tag(name = GenericRestController.TAG_RESOURCES, description = TAG_RESOURCES_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "201", description = "", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -469,7 +454,8 @@ public class GenericRestController {
 		return ResponseEntity.created(uri).body(response);
 	}
 
-	@Operation(summary = "Reads an object resource by the given path.", tags = { TAG })
+	@Operation(summary = "Reads an object resource by the given path.", tags = { TAG_RESOURCES })
+	@Tag(name = GenericRestController.TAG_RESOURCES, description = TAG_RESOURCES_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "On success request.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -508,7 +494,8 @@ public class GenericRestController {
 		return handle(re);
 	}
 
-	@Operation(summary = "Updates an object resource with the given information.", tags = { TAG })
+	@Operation(summary = "Updates an object resource with the given information.", tags = { TAG_RESOURCES })
+	@Tag(name = GenericRestController.TAG_RESOURCES, description = TAG_RESOURCES_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -539,7 +526,8 @@ public class GenericRestController {
 		return handle(re);
 	}
 
-	@Operation(summary = "Deletes an object resource by the given path.", tags = { TAG })
+	@Operation(summary = "Deletes an object resource by the given path.", tags = { TAG_RESOURCES })
+	@Tag(name = GenericRestController.TAG_RESOURCES, description = TAG_RESOURCES_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "On success request.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -569,7 +557,8 @@ public class GenericRestController {
 		return handle(re);
 	}
 
-	@Operation(summary = "Count object resources.", tags = { TAG })
+	@Operation(summary = "Count object resources.", tags = { TAG_RESOURCES })
+	@Tag(name = GenericRestController.TAG_RESOURCES, description = TAG_RESOURCES_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "On success request.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -613,7 +602,8 @@ public class GenericRestController {
 		return handle(re);
 	}
 
-	@Operation(summary = "List object resources.", tags = { TAG })
+	@Operation(summary = "List object resources.", tags = { TAG_RESOURCES })
+	@Tag(name = GenericRestController.TAG_RESOURCES, description = TAG_RESOURCES_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "On success request.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -663,7 +653,8 @@ public class GenericRestController {
 
 	// +------------- HISTORY METHODS ------------------+
 
-	@Operation(summary = "Get the full history of a given entity.", tags = { TAG })
+	@Operation(summary = "Get the full history of a given entity.", tags = { TAG_HISTORY })
+	@Tag(name = GenericRestController.TAG_HISTORY, description = TAG_HISTORY_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "On success request.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -689,7 +680,8 @@ public class GenericRestController {
 		return handle(re);
 	}
 
-	@Operation(summary = "Get an specific entity`s history.", tags = { TAG })
+	@Operation(summary = "Get an specific entity`s history.", tags = { TAG_HISTORY })
+	@Tag(name = GenericRestController.TAG_HISTORY, description = TAG_HISTORY_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "On success request.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -719,7 +711,8 @@ public class GenericRestController {
 		return handle(re);
 	}
 
-	@Operation(summary = "Get an entity`s resources history.", tags = { TAG })
+	@Operation(summary = "Get an entity`s resources history.", tags = { TAG_HISTORY })
+	@Tag(name = GenericRestController.TAG_HISTORY, description = TAG_HISTORY_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "On success request.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
@@ -754,7 +747,96 @@ public class GenericRestController {
 	}
 
 	// +------------- COLLECTION METHODS ------------------+
-	@Operation(summary = "Properties for entities mapping.", tags = { TAG })
+	@Operation(summary = "Count objects.", tags = { TAG_BASIC })
+	@Tag(name = GenericRestController.TAG_BASIC, description = TAG_BASIC_DESCRIPTION)
+	@ApiResponses(value = { //
+			@ApiResponse(responseCode = "200", description = "On success request.", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							schema = @Schema(implementation = WrapperVO.class)) }), //
+			@ApiResponse(responseCode = "4XX", description = "On read errors.", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							schema = @Schema(implementation = ApiFailure.class)) }) //
+	})
+	@GetMapping(value = "/{entity}/count", //
+			produces = { MediaType.APPLICATION_JSON_VALUE } //
+	)
+	public ResponseEntity<WrapperVO<Long>> count(//
+			@Parameter(description = "Entity type.", required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @PathVariable("entity") String entity, //
+
+			@Parameter(description = "Filter predicate with pattern described at https://github.com/thiagolvlsantos/json-predicate.", //
+					example = "{\"name\": {\"$contains\": \"k8s\"}}") //
+			@Nullable @RequestParam(name = "filter", required = false) String filter, //
+
+			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
+			@Nullable @RequestParam(name = "paging", required = false) String paging, //
+
+			@Parameter(description = "Commit id.") //
+			@Nullable @RequestParam(name = "commit", required = false) String commit, //
+
+			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
+			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
+			@RequestParam(name = "at", required = false) LocalDateTime at //
+	) {
+		RestCountEvent<WrapperVO<Long>> re = new RestCountEvent<>(this);
+		re.setEntity(entity);
+		re.setFilter(filter);
+		re.setPaging(paging);
+		re.setCommit(commit);
+		re.setAt(timestamp(at));
+		publisher.publishEvent(re);
+		return handle(re);
+	}
+
+	@Operation(summary = "List objects.", tags = { TAG_BASIC })
+	@Tag(name = GenericRestController.TAG_BASIC, description = TAG_BASIC_DESCRIPTION)
+	@ApiResponses(value = { //
+			@ApiResponse(responseCode = "200", description = "", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							array = @ArraySchema(schema = @Schema(implementation = Object.class))) }), //
+			@ApiResponse(responseCode = "4XX", description = "On read errors.", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							schema = @Schema(implementation = ApiFailure.class)) }) //
+	})
+	@GetMapping(value = "/{entity}/list", //
+			produces = { MediaType.APPLICATION_JSON_VALUE } //
+	)
+	public ResponseEntity<List<Object>> list(//
+			@Parameter(description = "Entity type.", required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @PathVariable("entity") String entity, //
+
+			@Parameter(description = "Filter predicate with pattern described at https://github.com/thiagolvlsantos/json-predicate.", //
+					example = "{\"name\": {\"$contains\": \"k8s\"}}") //
+			@Nullable @RequestParam(name = "filter", required = false) String filter, //
+
+			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
+			@Nullable @RequestParam(name = "paging", required = false) String paging, //
+
+			@Parameter(description = "Sorting information.", example = "{ \"property\":\"parent.name\", \"sort\":\"asc\", \"nullsFirst\":true }") //
+			@Nullable @RequestParam(name = "sorting", required = false) String sorting, //
+
+			@Parameter(description = "Commit id.") //
+			@Nullable @RequestParam(name = "commit", required = false) String commit, //
+
+			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
+			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
+			@RequestParam(name = "at", required = false) LocalDateTime at //
+	) {
+		RestListEvent<List<Object>> re = new RestListEvent<>(this);
+		re.setEntity(entity);
+		re.setFilter(filter);
+		re.setPaging(paging);
+		re.setSorting(sorting);
+		re.setCommit(commit);
+		re.setAt(timestamp(at));
+		publisher.publishEvent(re);
+		return handle(re);
+	}
+
+	@Operation(summary = "Properties for entities mapping.", tags = { TAG_PROPERTIES })
+	@Tag(name = GenericRestController.TAG_PROPERTIES, description = TAG_PROPERTIES_DESCRIPTION)
 	@ApiResponses(value = { //
 			@ApiResponse(responseCode = "200", description = "On success request.", //
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //

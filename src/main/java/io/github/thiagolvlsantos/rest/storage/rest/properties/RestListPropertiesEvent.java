@@ -1,4 +1,4 @@
-package io.github.thiagolvlsantos.rest.storage.rest.collection;
+package io.github.thiagolvlsantos.rest.storage.rest.properties;
 
 import io.github.thiagolvlsantos.rest.storage.rest.AbstractRestEvent;
 import lombok.Getter;

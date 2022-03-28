@@ -12,18 +12,19 @@ import io.github.thiagolvlsantos.file.storage.FileParams;
 import io.github.thiagolvlsantos.file.storage.annotations.UtilAnnotations;
 import io.github.thiagolvlsantos.file.storage.exceptions.FileStorageException;
 import io.github.thiagolvlsantos.file.storage.util.repository.ResourceVO;
+import io.github.thiagolvlsantos.rest.storage.rest.basic.RestCountEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestDeleteEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.basic.RestListEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestReadEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestSaveEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestUpdateEvent;
-import io.github.thiagolvlsantos.rest.storage.rest.collection.RestCountEvent;
-import io.github.thiagolvlsantos.rest.storage.rest.collection.RestListEvent;
-import io.github.thiagolvlsantos.rest.storage.rest.collection.RestListPropertiesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryNameEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryResourceEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.properties.RestGetPropertyEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.properties.RestListPropertiesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.properties.RestPropertiesEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.properties.RestSetPropertiesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.properties.RestSetPropertyEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestCountResourcesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestDeleteResourceEvent;
@@ -65,12 +66,20 @@ public abstract class AbstractRestHandler<P, Q> implements ApplicationListener<A
 				update((RestUpdateEvent<P>) event);
 			} else if (event instanceof RestDeleteEvent) {
 				delete((RestDeleteEvent<P>) event);
+			} else if (event instanceof RestCountEvent) {
+				count((RestCountEvent<WrapperVO<Long>>) event);
+			} else if (event instanceof RestListEvent) {
+				list((RestListEvent<List<P>>) event);
 			} else if (event instanceof RestSetPropertyEvent) {
 				setProperty((RestSetPropertyEvent<P>) event);
+			} else if (event instanceof RestSetPropertiesEvent) {
+				setProperty((RestSetPropertiesEvent<List<P>>) event);
 			} else if (event instanceof RestGetPropertyEvent) {
 				getProperty((RestGetPropertyEvent<WrapperVO<Object>>) event);
 			} else if (event instanceof RestPropertiesEvent) {
 				properties((RestPropertiesEvent<Map<String, Object>>) event);
+			} else if (event instanceof RestListPropertiesEvent) {
+				properties((RestListPropertiesEvent<Map<String, Map<String, Object>>>) event);
 			} else if (event instanceof RestSetResourceEvent) {
 				setResource((RestSetResourceEvent<P>) event);
 			} else if (event instanceof RestGetResourceEvent) {
@@ -89,12 +98,6 @@ public abstract class AbstractRestHandler<P, Q> implements ApplicationListener<A
 				historyName((RestHistoryNameEvent<List<HistoryVO>>) event);
 			} else if (event instanceof RestHistoryResourceEvent) {
 				historyResources((RestHistoryResourceEvent<List<HistoryVO>>) event);
-			} else if (event instanceof RestCountEvent) {
-				count((RestCountEvent<WrapperVO<Long>>) event);
-			} else if (event instanceof RestListEvent) {
-				list((RestListEvent<List<P>>) event);
-			} else if (event instanceof RestListPropertiesEvent) {
-				properties((RestListPropertiesEvent<Map<String, Map<String, Object>>>) event);
 			}
 		}
 	}
@@ -132,6 +135,12 @@ public abstract class AbstractRestHandler<P, Q> implements ApplicationListener<A
 	protected void setProperty(RestSetPropertyEvent<P> event) {
 		event.setResult(
 				service.setProperty(FileParams.of(event.getName()), event.getProperty(), event.getDataAsString()));
+	}
+
+	@SneakyThrows
+	protected void setProperty(RestSetPropertiesEvent<List<P>> event) {
+		event.setResult(service.setProperty(event.getProperty(), event.getDataAsString(), event.getFilter(),
+				event.getPaging(), event.getSorting()));
 	}
 
 	@SneakyThrows
