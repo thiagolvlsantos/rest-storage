@@ -66,12 +66,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GenericRestController {
 
+	public static final String API_URL_VERSION = "/v1";
+
 	public static final String PATH_PROPERTIES = "properties";
 	public static final String PATH_RESOURCES = "resources";
 	public static final String PATH_HISTORY = "history";
 
 	public static final String TAG = "All";
-	public static final String TAG_DESCRIPTION = "<p> <b>IMPORTANT</b>: All names have pattern: 'string(;string)*'.</p>";
+	public static final String TAG_DESCRIPTION = "<p> <b>IMPORTANT</b>: The name parts depends on your implementation, i.e. for file-rest-storage implementation names have pattern: 'string(;string)*'.</p>";
 
 	public static final String TAG_BASIC = "Basic";
 	public static final String TAG_BASIC_DESCRIPTION = "Basic operations. " + TAG_DESCRIPTION;
@@ -83,12 +85,30 @@ public class GenericRestController {
 	public static final String TAG_RESOURCES_DESCRIPTION = "Resources operations." + TAG_DESCRIPTION;
 
 	public static final String TAG_HISTORY = "History";
-	public static final String TAG_HISTORY_DESCRIPTION = "History oprations." + TAG_DESCRIPTION;
+	public static final String TAG_HISTORY_DESCRIPTION = "History operations." + TAG_DESCRIPTION;
 
-	public static final String TAG_COLLECTION = "Collections";
-	public static final String TAG_COLLECTION_DESCRIPTION = "Collections operations." + TAG_DESCRIPTION;
+	private static final String PATH_ENTITY_TYPE_NAME = "entity";
+	private static final String PATH_ENTITY_TYPE_DESCRIPTION = "Entity type.";
+	private static final String PATH_ENTITY_NAME_NAME = "name";
+	private static final String PATH_ENTITY_NAME_DESCRIPTION = "Entity name.";
 
-	public static final String API_URL_VERSION = "/v1";
+	private static final String PARAMETER_FILTER_NAME = "filter";
+	private static final String PARAMETER_FILTER_DESCRIPTION = "Filter predicate as String. i.e. JSON pattern described at https://github.com/thiagolvlsantos/json-predicate for file-storage backend services.";
+	private static final String PARAMETER_FILTER_EXAMPLE = "{\"name\": {\"$contains\": \"k8s\"}}";
+
+	private static final String PARAMETER_PAGING_NAME = "paging";
+	private static final String PARAMETER_PAGINATION_DESCRIPTION = "Pagination information, with optional skip and max values.";
+	private static final String PARAMETER_PAGINATION_EXAMPLE = "{ \"skip\":0, \"max\":10 }";
+
+	private static final String PARAMETER_SORTING_NAME = "sorting";
+	private static final String PARAMETER_SORTING_DESCRIPTION = "Sorting information, with fields and orders. i.e. In the JSON format accepted by file-storage.";
+	private static final String PARAMETER_SORTING_EXAMPLE = "{ \"property\":\"parent.name\", \"sort\":\"asc\", \"nullsFirst\":true }";
+
+	private static final String PARAMETER_COMMIT_NAME = "commit";
+	private static final String PARAMETER_COMMIT_DESCRIPTION = "Commit id.";
+
+	private static final String PARAMETER_AT_NAME = "at";
+	private static final String PARAMETER_AT_DESCRIPTION = "Date of reading. ISO DATE_TIME format.";
 
 	private @Autowired ApplicationEventPublisher publisher;
 
@@ -119,9 +139,10 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<Object> save( //
-			@Parameter(description = "Entity type.", required = true, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
 					schema = @Schema(implementation = String.class)) //
-			@Valid @PathVariable("entity") String entity, //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
+
 			@Parameter(description = "Entity information to add.", required = true, //
 					schema = @Schema(implementation = Object.class)) //
 			@Valid @RequestBody(required = true) String content //
@@ -152,19 +173,20 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE }//
 	)
 	public ResponseEntity<Object> read( //
-			@Parameter(description = "Entity type.", required = true, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
 					schema = @Schema(implementation = String.class)) //
-			@Valid @PathVariable("entity") String entity, //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Entity name.", required = true) //
-			@Valid @NotBlank @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
-			@Parameter(description = "Commit id.") //
-			@Nullable @RequestParam(name = "commit", required = false) String commit, //
+			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
+			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
 
-			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
+			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
 			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = "at", required = false) LocalDateTime at //
+			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
 	) {
 		RestReadEvent<Object> re = new RestReadEvent<>(this);
 		re.setEntity(entity);
@@ -202,12 +224,13 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<Object> update(//
-			@Parameter(description = "Entity type.", required = true, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
 					schema = @Schema(implementation = String.class)) //
-			@Valid @PathVariable("entity") String entity, //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Entity name.", required = true) //
-			@Valid @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
 			@Parameter(description = "Object with new data.", required = true, //
 					schema = @Schema(implementation = Object.class)) //
@@ -235,12 +258,13 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<Object> delete(//
-			@Parameter(description = "Entity type.", required = true, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
 					schema = @Schema(implementation = String.class)) //
-			@Valid @PathVariable("entity") String entity, //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Entity name.", required = true) //
-			@Valid @PathVariable(required = true) String name //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name //
 	) {
 		RestDeleteEvent<Object> re = new RestDeleteEvent<>(this);
 		re.setEntity(entity);
@@ -266,11 +290,13 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE }//
 	)
 	public ResponseEntity<Object> setProperty(//
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Object name.", required = true) //
-			@Valid @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
 			@Parameter(description = "Object property.", required = true) //
 			@Valid @PathVariable(required = true) String property, //
@@ -302,8 +328,9 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE }//
 	)
 	public ResponseEntity<List<Object>> setProperty(//
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
 			@Parameter(description = "Object property.", required = true) //
 			@Valid @PathVariable(required = true) String property, //
@@ -311,15 +338,15 @@ public class GenericRestController {
 			@Parameter(description = "Property data as String.", required = true) //
 			@Valid @RequestBody(required = true) String dataAsString, //
 
-			@Parameter(description = "Filter predicate with pattern described at https://github.com/thiagolvlsantos/json-predicate.", //
-					example = "{\"name\": {\"$contains\": \"k8s\"}}") //
-			@Nullable @RequestParam(name = "filter", required = false) String filter, //
+			@Parameter(description = PARAMETER_FILTER_DESCRIPTION, //
+					example = PARAMETER_FILTER_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_FILTER_NAME, required = false) String filter, //
 
-			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
-			@Nullable @RequestParam(name = "paging", required = false) String paging, //
+			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging, //
 
-			@Parameter(description = "Sorting information.", example = "{ \"property\":\"parent.name\", \"sort\":\"asc\", \"nullsFirst\":true }") //
-			@Nullable @RequestParam(name = "sorting", required = false) String sorting //
+			@Parameter(description = PARAMETER_SORTING_DESCRIPTION, example = PARAMETER_SORTING_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_SORTING_NAME, required = false) String sorting //
 
 	) {
 		RestSetPropertiesEvent<List<Object>> re = new RestSetPropertiesEvent<>(this);
@@ -347,21 +374,23 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<WrapperVO<Object>> getProperty( //
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Object name.", required = true) //
-			@Valid @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
 			@Parameter(description = "Object property.", required = true) //
 			@Valid @PathVariable(required = true) String property, //
 
-			@Parameter(description = "Commit id.") //
-			@Nullable @RequestParam(name = "commit", required = false) String commit, //
+			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
+			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
 
-			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
+			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
 			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = "at", required = false) LocalDateTime at //
+			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
 	) {
 		RestGetPropertyEvent<WrapperVO<Object>> re = new RestGetPropertyEvent<>(this);
 		re.setEntity(entity);
@@ -387,21 +416,23 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<Map<String, Object>> properties(//
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Object name.", required = true) //
-			@Valid @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
 			@Parameter(description = "Property names. Separated with ','.") //
 			@Nullable @RequestParam(name = "properties", required = false) String properties, //
 
-			@Parameter(description = "Commit id.") //
-			@Nullable @RequestParam(name = "commit", required = false) String commit, //
+			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
+			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
 
-			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
+			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
 			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = "at", required = false) LocalDateTime at //
+			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
 	) {
 		RestPropertiesEvent<Map<String, Object>> re = new RestPropertiesEvent<>(this);
 		re.setEntity(entity);
@@ -430,11 +461,13 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<Object> setResource(//
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Object name.", required = true) //
-			@Valid @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
 			@Parameter(description = "Resource content.", required = true) //
 			@Valid @RequestBody(required = true) ResourceVO resource//
@@ -467,21 +500,23 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<ResourceVO> getResource(//
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Object name.", required = true) //
-			@Valid @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
 			@Parameter(description = "Object resource path.", required = true) //
 			@Valid @RequestParam(name = "path", required = true) String path, //
 
-			@Parameter(description = "Commit id.") //
-			@Nullable @RequestParam(name = "commit", required = false) String commit, //
+			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
+			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
 
-			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
+			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
 			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = "at", required = false) LocalDateTime at //
+			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
 	) {
 		RestGetResourceEvent<ResourceVO> re = new RestGetResourceEvent<>(this);
 		re.setEntity(entity);
@@ -508,11 +543,13 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<Object> updateResource(//
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Object name.", required = true) //
-			@Valid @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
 			@Parameter(description = "Resource content.", required = true) //
 			@Valid @RequestBody(required = true) ResourceVO resource//
@@ -539,11 +576,13 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<Object> deleteResource( //
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Object name.", required = true) //
-			@Valid @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
 			@Parameter(description = "Object resource path.", required = true) //
 			@Valid @RequestParam(name = "path", required = true) String path//
@@ -570,25 +609,27 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<WrapperVO<Long>> countResources( //
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Object name.", required = true) //
-			@Valid @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
-			@Parameter(description = "Filter predicate with pattern described at https://github.com/thiagolvlsantos/json-predicate.", //
+			@Parameter(description = PARAMETER_FILTER_DESCRIPTION, //
 					example = "{\"content.data\": {\"$contains\": \"html\"}}") //
-			@Nullable @RequestParam(name = "filter", required = false) String filter, //
+			@Nullable @RequestParam(name = PARAMETER_FILTER_NAME, required = false) String filter, //
 
-			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
-			@Nullable @RequestParam(name = "paging", required = false) String paging, //
+			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging, //
 
-			@Parameter(description = "Commit id.") //
-			@Nullable @RequestParam(name = "commit", required = false) String commit, //
+			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
+			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
 
-			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
+			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
 			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = "at", required = false) LocalDateTime at //
+			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
 	) {
 		RestCountResourcesEvent<WrapperVO<Long>> re = new RestCountResourcesEvent<>(this);
 		re.setEntity(entity);
@@ -615,28 +656,30 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<List<ResourceVO>> listResources( //
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Object name.", required = true) //
-			@Valid @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
-			@Parameter(description = "Filter predicate with pattern described at https://github.com/thiagolvlsantos/json-predicate.", //
+			@Parameter(description = PARAMETER_FILTER_DESCRIPTION, //
 					example = "{\"content.data\": {\"$contains\": \"html\"}}") //
-			@Nullable @RequestParam(name = "filter", required = false) String filter, //
+			@Nullable @RequestParam(name = PARAMETER_FILTER_NAME, required = false) String filter, //
 
-			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
-			@Nullable @RequestParam(name = "paging", required = false) String paging, //
+			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging, //
 
-			@Parameter(description = "Sorting information.", example = "{ \"property\":\"metadata.path\", \"sort\":\"desc\" }") //
-			@Nullable @RequestParam(name = "sorting", required = false) String sorting, //
+			@Parameter(description = PARAMETER_SORTING_DESCRIPTION, example = "{ \"property\":\"metadata.path\", \"sort\":\"desc\" }") //
+			@Nullable @RequestParam(name = PARAMETER_SORTING_NAME, required = false) String sorting, //
 
-			@Parameter(description = "Commit id.") //
-			@Nullable @RequestParam(name = "commit", required = false) String commit, //
+			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
+			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
 
-			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
+			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
 			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = "at", required = false) LocalDateTime at //
+			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
 	) {
 		RestListResourcesEvent<List<ResourceVO>> re = new RestListResourcesEvent<>(this);
 		re.setEntity(entity);
@@ -666,11 +709,12 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<List<HistoryVO>> history(//
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
-			@Nullable @RequestParam(name = "paging", required = false) String paging //
+			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging //
 	) {
 		RestHistoryEvent<List<HistoryVO>> re = new RestHistoryEvent<>(this);
 		re.setEntity(entity);
@@ -693,14 +737,16 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<List<HistoryVO>> historyName( //
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Object name.", required = true) //
-			@Valid @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
-			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
-			@Nullable @RequestParam(name = "paging", required = false) String paging //
+			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging //
 	) {
 		RestHistoryNameEvent<List<HistoryVO>> re = new RestHistoryNameEvent<>(this);
 		re.setEntity(entity);
@@ -724,17 +770,19 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<List<HistoryVO>> historyResource( //
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Object name.", required = true) //
-			@Valid @PathVariable(required = true) String name, //
+			@Parameter(description = PATH_ENTITY_NAME_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
 			@Parameter(description = "Object resource path.") //
 			@Nullable @RequestParam(name = "path", required = false) String path, //
 
-			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
-			@Nullable @RequestParam(name = "paging", required = false) String paging //
+			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging //
 	) {
 		RestHistoryResourceEvent<List<HistoryVO>> re = new RestHistoryResourceEvent<>(this);
 		re.setEntity(entity);
@@ -760,23 +808,23 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<WrapperVO<Long>> count(//
-			@Parameter(description = "Entity type.", required = true, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
 					schema = @Schema(implementation = String.class)) //
-			@Valid @PathVariable("entity") String entity, //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Filter predicate with pattern described at https://github.com/thiagolvlsantos/json-predicate.", //
-					example = "{\"name\": {\"$contains\": \"k8s\"}}") //
-			@Nullable @RequestParam(name = "filter", required = false) String filter, //
+			@Parameter(description = PARAMETER_FILTER_DESCRIPTION, //
+					example = PARAMETER_FILTER_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_FILTER_NAME, required = false) String filter, //
 
-			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
-			@Nullable @RequestParam(name = "paging", required = false) String paging, //
+			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging, //
 
-			@Parameter(description = "Commit id.") //
-			@Nullable @RequestParam(name = "commit", required = false) String commit, //
+			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
+			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
 
-			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
+			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
 			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = "at", required = false) LocalDateTime at //
+			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
 	) {
 		RestCountEvent<WrapperVO<Long>> re = new RestCountEvent<>(this);
 		re.setEntity(entity);
@@ -802,26 +850,26 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<List<Object>> list(//
-			@Parameter(description = "Entity type.", required = true, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
 					schema = @Schema(implementation = String.class)) //
-			@Valid @PathVariable("entity") String entity, //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
-			@Parameter(description = "Filter predicate with pattern described at https://github.com/thiagolvlsantos/json-predicate.", //
-					example = "{\"name\": {\"$contains\": \"k8s\"}}") //
-			@Nullable @RequestParam(name = "filter", required = false) String filter, //
+			@Parameter(description = PARAMETER_FILTER_DESCRIPTION, //
+					example = PARAMETER_FILTER_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_FILTER_NAME, required = false) String filter, //
 
-			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
-			@Nullable @RequestParam(name = "paging", required = false) String paging, //
+			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging, //
 
-			@Parameter(description = "Sorting information.", example = "{ \"property\":\"parent.name\", \"sort\":\"asc\", \"nullsFirst\":true }") //
-			@Nullable @RequestParam(name = "sorting", required = false) String sorting, //
+			@Parameter(description = PARAMETER_SORTING_DESCRIPTION, example = PARAMETER_SORTING_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_SORTING_NAME, required = false) String sorting, //
 
-			@Parameter(description = "Commit id.") //
-			@Nullable @RequestParam(name = "commit", required = false) String commit, //
+			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
+			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
 
-			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
+			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
 			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = "at", required = false) LocalDateTime at //
+			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
 	) {
 		RestListEvent<List<Object>> re = new RestListEvent<>(this);
 		re.setEntity(entity);
@@ -848,28 +896,29 @@ public class GenericRestController {
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<Map<String, Map<String, Object>>> properties(//
-			@Parameter(description = "Object type.", required = true) //
-			@Valid @PathVariable(required = true) String entity, //
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
 
 			@Parameter(description = "Property names. Separated with ','.") //
 			@Nullable @RequestParam(name = "properties", required = false) String properties, //
 
-			@Parameter(description = "Filter predicate with pattern described at https://github.com/thiagolvlsantos/json-predicate.", //
-					example = "{\"content.data\": {\"$contains\": \"html\"}}") //
-			@Nullable @RequestParam(name = "filter", required = false) String filter, //
+			@Parameter(description = PARAMETER_FILTER_DESCRIPTION, //
+					example = PARAMETER_FILTER_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_FILTER_NAME, required = false) String filter, //
 
-			@Parameter(description = "Pagination information.", example = "{ \"skip\":0, \"max\":10 }") //
-			@Nullable @RequestParam(name = "paging", required = false) String paging, //
+			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging, //
 
-			@Parameter(description = "Sorting information.", example = "{ \"property\":\"metadata.path\", \"sort\":\"desc\" }") //
-			@Nullable @RequestParam(name = "sorting", required = false) String sorting, //
+			@Parameter(description = PARAMETER_SORTING_DESCRIPTION, example = PARAMETER_SORTING_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_SORTING_NAME, required = false) String sorting, //
 
-			@Parameter(description = "Commit id.") //
-			@Nullable @RequestParam(name = "commit", required = false) String commit, //
+			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
+			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
 
-			@Parameter(description = "Date of reading. ISO DATE_TIME format.") //
+			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
 			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = "at", required = false) LocalDateTime at //
+			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
 	) {
 		RestListPropertiesEvent<Map<String, Map<String, Object>>> re = new RestListPropertiesEvent<>(this);
 		re.setEntity(entity);
