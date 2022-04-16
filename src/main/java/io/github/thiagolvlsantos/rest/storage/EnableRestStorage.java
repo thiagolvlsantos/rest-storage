@@ -11,8 +11,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import io.github.thiagolvlsantos.file.storage.EnableFileStorage;
-import io.github.thiagolvlsantos.git.transactions.EnableGitTransactions;
 import io.github.thiagolvlsantos.rest.storage.EnableRestStorage.RestStorage;
 
 @Target({ ElementType.TYPE })
@@ -20,8 +18,6 @@ import io.github.thiagolvlsantos.rest.storage.EnableRestStorage.RestStorage;
 @Documented
 @Inherited
 @Import({ RestStorage.class })
-@EnableFileStorage
-@EnableGitTransactions
 public @interface EnableRestStorage {
 
 	@Configuration

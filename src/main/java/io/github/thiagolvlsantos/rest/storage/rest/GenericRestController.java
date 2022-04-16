@@ -27,8 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.github.thiagolvlsantos.file.storage.annotations.UtilAnnotations;
-import io.github.thiagolvlsantos.file.storage.util.repository.ResourceVO;
 import io.github.thiagolvlsantos.rest.storage.error.ApiFailure;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestCountEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestDeleteEvent;
@@ -44,6 +42,7 @@ import io.github.thiagolvlsantos.rest.storage.rest.properties.RestListProperties
 import io.github.thiagolvlsantos.rest.storage.rest.properties.RestPropertiesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.properties.RestSetPropertiesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.properties.RestSetPropertyEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.resources.ResourceVO;
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestCountResourcesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestDeleteResourceEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestGetResourceEvent;
@@ -63,7 +62,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping(GenericRestController.API_URL)
+@RequestMapping(GenericRestController.API_URL_VERSION)
 @Slf4j
 public class GenericRestController {
 
@@ -89,14 +88,14 @@ public class GenericRestController {
 	public static final String TAG_COLLECTION = "Collections";
 	public static final String TAG_COLLECTION_DESCRIPTION = "Collections operations." + TAG_DESCRIPTION;
 
-	public static final String API_URL = "/";
+	public static final String API_URL_VERSION = "/v1";
 
 	private @Autowired ApplicationEventPublisher publisher;
 
 	@PostConstruct
 	public void init() {
 		if (log.isInfoEnabled()) {
-			log.info(getClass().getSimpleName() + " init:" + API_URL);
+			log.info(getClass().getSimpleName() + " init:" + API_URL_VERSION);
 		}
 	}
 
@@ -127,15 +126,15 @@ public class GenericRestController {
 					schema = @Schema(implementation = Object.class)) //
 			@Valid @RequestBody(required = true) String content //
 	) throws URISyntaxException {
-		RestSaveEvent<Object> re = new RestSaveEvent<>(this);
+		RestSaveEvent<IObjectReference> re = new RestSaveEvent<>(this);
 		re.setEntity(entity);
 		re.setContent(content);
 		publisher.publishEvent(re);
-		Object response = re.getResult();
+		IObjectReference response = re.getResult();
 		if (response == null) {
 			return ResponseEntity.badRequest().build();
 		}
-		URI uri = new URI(API_URL + "/" + UtilAnnotations.getKeysChain(response.getClass(), response));
+		URI uri = new URI(API_URL_VERSION + "/" + entity + "/" + response.getReference());
 		return ResponseEntity.created(uri).body(response);
 	}
 
@@ -440,17 +439,17 @@ public class GenericRestController {
 			@Parameter(description = "Resource content.", required = true) //
 			@Valid @RequestBody(required = true) ResourceVO resource//
 	) throws URISyntaxException {
-		RestSetResourceEvent<Object> re = new RestSetResourceEvent<>(this);
+		RestSetResourceEvent<IObjectReference> re = new RestSetResourceEvent<>(this);
 		re.setEntity(entity);
 		re.setName(name);
 		re.setResource(resource);
 		publisher.publishEvent(re);
-		Object response = re.getResult();
+		IObjectReference response = re.getResult();
 		if (response == null) {
 			return ResponseEntity.badRequest().build();
 		}
-		URI uri = new URI(API_URL + "/" + UtilAnnotations.getKeysChain(response.getClass(), response)
-				+ "/resources?path=" + resource.getMetadata().getPath());
+		URI uri = new URI(API_URL_VERSION + "/" + entity + "/" + response.getReference() + "/resources?path="
+				+ resource.getMetadata().getPath());
 		return ResponseEntity.created(uri).body(response);
 	}
 

@@ -1,4 +1,4 @@
-package io.github.thiagolvlsantos.rest.storage.service;
+package io.github.thiagolvlsantos.rest.storage.rest.resources;
 
 import java.io.Serializable;
 
@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Getter
@@ -13,11 +14,10 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@ToString
 @SuppressWarnings("serial")
-public class HistoryVO implements Serializable {
-	private String id;
-	private HistoryIdent authorIdent;
-	private HistoryIdent committerIdent;
-	private String shortMessage;
-	private String fullMessage;
+public class ResourceVO implements Serializable {
+
+	private ResourceMetadataVO metadata;
+	private ResourceContentVO content;
 }

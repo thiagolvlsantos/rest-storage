@@ -48,10 +48,6 @@
 		<sonar.coverage.exclusions>**/*Print.java,**/*Web.java,**/*Constants.java,**/*Test.java</sonar.coverage.exclusions>
 
 		<!-- DEPENDENCIES -->
-		<git-transactions.version>0.0.4</git-transactions.version>
-		<file-storage.version>0.0.5-SNAPSHOT</file-storage.version>
-		<json-predicate.version>0.0.7</json-predicate.version>
-		<orika-core.version>1.5.4</orika-core.version>
 		<springdoc-openapi-ui.version>1.5.10</springdoc-openapi-ui.version>
 	</properties>
 
@@ -110,28 +106,6 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
 			<version>${springdoc-openapi-ui.version}</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/ma.glasnost.orika/orika-core -->
-		<dependency>
-			<groupId>ma.glasnost.orika</groupId>
-			<artifactId>orika-core</artifactId>
-			<version>${orika-core.version}</version>
-		</dependency>
-		<!-- personal -->
-		<dependency>
-			<groupId>io.github.thiagolvlsantos</groupId>
-			<artifactId>git-transactions</artifactId>
-			<version>${git-transactions.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.github.thiagolvlsantos</groupId>
-			<artifactId>file-storage</artifactId>
-			<version>${file-storage.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.github.thiagolvlsantos</groupId>
-			<artifactId>json-predicate</artifactId>
-			<version>${json-predicate.version}</version>
 		</dependency>
 	</dependencies>
 
