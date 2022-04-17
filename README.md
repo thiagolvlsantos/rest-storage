@@ -8,7 +8,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.thiagolvlsantos/rest-storage/badge.svg)](https://repo1.maven.org/maven2/io/github/thiagolvlsantos/rest-storage/)
 [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-A generic endpoint for versioned entities stored in Git repositories using git-transactions and file-storage.
+A generic endpoint to storage of objects.
 
 ## Usage
 
