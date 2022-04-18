@@ -12,6 +12,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuppressWarnings("serial")
-public class WrapperVO<T> implements Serializable {
+public class WrapperVO<T extends Serializable> implements Serializable {
 	private T value;
 }
