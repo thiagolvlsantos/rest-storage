@@ -18,8 +18,9 @@ import lombok.experimental.SuperBuilder;
 @ToString
 @SuppressWarnings("serial")
 public class ResourceMetadataVO implements Serializable {
-	public String path;
-	public String encoding;
-	public String contentType;
-	public LocalDateTime timestamp;
+
+	private String path;
+	private String encoding;
+	private String contentType;
+	private LocalDateTime timestamp;
 }

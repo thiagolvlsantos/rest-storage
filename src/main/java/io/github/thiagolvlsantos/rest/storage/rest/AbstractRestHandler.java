@@ -11,6 +11,7 @@ import io.github.thiagolvlsantos.rest.storage.rest.basic.RestListEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestReadEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestSaveEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestUpdateEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.history.HistoryVO;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryNameEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryResourceEvent;
@@ -26,8 +27,6 @@ import io.github.thiagolvlsantos.rest.storage.rest.resources.RestGetResourceEven
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestListResourcesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestSetResourceEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestUpdateResourceEvent;
-import io.github.thiagolvlsantos.rest.storage.service.HistoryVO;
-import io.github.thiagolvlsantos.rest.storage.service.WrapperVO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,7 +37,7 @@ public abstract class AbstractRestHandler<P> implements ApplicationListener<Abst
 	protected String entity;
 	protected Class<P> type;
 
-	public AbstractRestHandler(String entity, Class<P> type) {
+	protected AbstractRestHandler(String entity, Class<P> type) {
 		this.entity = entity;
 		this.type = type;
 	}

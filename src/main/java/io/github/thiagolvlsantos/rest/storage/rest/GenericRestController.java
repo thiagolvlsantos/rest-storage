@@ -34,6 +34,7 @@ import io.github.thiagolvlsantos.rest.storage.rest.basic.RestListEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestReadEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestSaveEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.basic.RestUpdateEvent;
+import io.github.thiagolvlsantos.rest.storage.rest.history.HistoryVO;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryNameEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.history.RestHistoryResourceEvent;
@@ -49,8 +50,6 @@ import io.github.thiagolvlsantos.rest.storage.rest.resources.RestGetResourceEven
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestListResourcesEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestSetResourceEvent;
 import io.github.thiagolvlsantos.rest.storage.rest.resources.RestUpdateResourceEvent;
-import io.github.thiagolvlsantos.rest.storage.service.HistoryVO;
-import io.github.thiagolvlsantos.rest.storage.service.WrapperVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -86,6 +85,8 @@ public class GenericRestController {
 
 	public static final String TAG_HISTORY = "History";
 	public static final String TAG_HISTORY_DESCRIPTION = "History operations." + TAG_DESCRIPTION;
+
+	private static final String PATH_SEPARATOR = "/";
 
 	private static final String PATH_ENTITY_TYPE_NAME = "entity";
 	private static final String PATH_ENTITY_TYPE_DESCRIPTION = "Entity type.";
@@ -155,7 +156,7 @@ public class GenericRestController {
 		if (response == null) {
 			return ResponseEntity.badRequest().build();
 		}
-		URI uri = new URI(API_URL_VERSION + "/" + entity + "/" + response.getReference());
+		URI uri = new URI(API_URL_VERSION + PATH_SEPARATOR + entity + PATH_SEPARATOR + response.getReference());
 		return ResponseEntity.created(uri).body(response);
 	}
 
@@ -481,8 +482,8 @@ public class GenericRestController {
 		if (response == null) {
 			return ResponseEntity.badRequest().build();
 		}
-		URI uri = new URI(API_URL_VERSION + "/" + entity + "/" + response.getReference() + "/resources?path="
-				+ resource.getMetadata().getPath());
+		URI uri = new URI(API_URL_VERSION + PATH_SEPARATOR + entity + PATH_SEPARATOR + response.getReference()
+				+ "/resources?path=" + resource.getMetadata().getPath());
 		return ResponseEntity.created(uri).body(response);
 	}
 
@@ -766,7 +767,7 @@ public class GenericRestController {
 					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
 							schema = @Schema(implementation = ApiFailure.class)) }) //
 	})
-	@GetMapping(value = "/{entity}/{name}/" + PATH_RESOURCES + "/" + PATH_HISTORY, //
+	@GetMapping(value = "/{entity}/{name}/" + PATH_RESOURCES + PATH_SEPARATOR + PATH_HISTORY, //
 			produces = { MediaType.APPLICATION_JSON_VALUE } //
 	)
 	public ResponseEntity<List<HistoryVO>> historyResource( //

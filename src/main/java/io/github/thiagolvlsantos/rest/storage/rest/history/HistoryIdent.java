@@ -1,4 +1,4 @@
-package io.github.thiagolvlsantos.rest.storage.service;
+package io.github.thiagolvlsantos.rest.storage.rest.history;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

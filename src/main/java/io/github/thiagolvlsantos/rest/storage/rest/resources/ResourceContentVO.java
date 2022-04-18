@@ -18,5 +18,5 @@ import lombok.experimental.SuperBuilder;
 @SuppressWarnings("serial")
 public class ResourceContentVO implements Serializable {
 
-	public String data;
+	private String data;
 }

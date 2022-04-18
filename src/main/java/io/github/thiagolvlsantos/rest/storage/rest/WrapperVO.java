@@ -1,4 +1,4 @@
-package io.github.thiagolvlsantos.rest.storage.service;
+package io.github.thiagolvlsantos.rest.storage.rest;
 
 import java.io.Serializable;
 
