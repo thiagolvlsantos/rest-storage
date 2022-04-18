@@ -47,7 +47,7 @@ springdoc:
 ```
 
 ## Rest Handler
-Extend `AbstractRestHandler` to receive all events basec on `entity` type. You can, as example, implement a service for a given entity based on `file-storage` or using `jpa + hibernate` to save objects.
+Extend `AbstractRestHandler` to receive all events based on `entity` type. You can, as example, implement a service for a given entity based on `file-storage` or using `jpa + hibernate` to save objects.
 
 ## Endpoints
 
@@ -57,4 +57,4 @@ According to this setup, after server start, the OpenApi interface will be avail
 
 ## Build
 
-Localy, from this root directory call Maven commands or `bin/<script name>` at our will.
+Localy, from this root directory call Maven commands or `bin/<script name>` at your will.
