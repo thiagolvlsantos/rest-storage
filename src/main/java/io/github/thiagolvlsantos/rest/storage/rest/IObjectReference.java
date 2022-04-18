@@ -1,6 +1,8 @@
 package io.github.thiagolvlsantos.rest.storage.rest;
 
-public interface IObjectReference {
+import java.io.Serializable;
+
+public interface IObjectReference extends Serializable {
 
 	String getReference();
 }
