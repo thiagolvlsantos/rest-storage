@@ -274,6 +274,94 @@ public class GenericRestController {
 		return handle(re);
 	}
 
+	@Operation(summary = "Count objects.", tags = { TAG_BASIC })
+	@Tag(name = GenericRestController.TAG_BASIC, description = TAG_BASIC_DESCRIPTION)
+	@ApiResponses(value = { //
+			@ApiResponse(responseCode = "200", description = "On success request.", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							schema = @Schema(implementation = WrapperVO.class)) }), //
+			@ApiResponse(responseCode = "4XX", description = "On read errors.", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							schema = @Schema(implementation = ApiFailure.class)) }) //
+	})
+	@GetMapping(value = "/{entity}/count", //
+			produces = { MediaType.APPLICATION_JSON_VALUE } //
+	)
+	public ResponseEntity<WrapperVO<Long>> count(//
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
+
+			@Parameter(description = PARAMETER_FILTER_DESCRIPTION, //
+					example = PARAMETER_FILTER_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_FILTER_NAME, required = false) String filter, //
+
+			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging, //
+
+			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
+			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
+
+			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
+			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
+			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
+	) {
+		RestCountEvent<WrapperVO<Long>> re = new RestCountEvent<>(this);
+		re.setEntity(entity);
+		re.setFilter(filter);
+		re.setPaging(paging);
+		re.setCommit(commit);
+		re.setAt(timestamp(at));
+		publisher.publishEvent(re);
+		return handle(re);
+	}
+
+	@Operation(summary = "List objects.", tags = { TAG_BASIC })
+	@Tag(name = GenericRestController.TAG_BASIC, description = TAG_BASIC_DESCRIPTION)
+	@ApiResponses(value = { //
+			@ApiResponse(responseCode = "200", description = "", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							array = @ArraySchema(schema = @Schema(implementation = Object.class))) }), //
+			@ApiResponse(responseCode = "4XX", description = "On read errors.", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							schema = @Schema(implementation = ApiFailure.class)) }) //
+	})
+	@GetMapping(value = "/{entity}/list", //
+			produces = { MediaType.APPLICATION_JSON_VALUE } //
+	)
+	public ResponseEntity<List<Object>> list(//
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
+
+			@Parameter(description = PARAMETER_FILTER_DESCRIPTION, //
+					example = PARAMETER_FILTER_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_FILTER_NAME, required = false) String filter, //
+
+			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging, //
+
+			@Parameter(description = PARAMETER_SORTING_DESCRIPTION, example = PARAMETER_SORTING_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_SORTING_NAME, required = false) String sorting, //
+
+			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
+			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
+
+			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
+			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
+			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
+	) {
+		RestListEvent<List<Object>> re = new RestListEvent<>(this);
+		re.setEntity(entity);
+		re.setFilter(filter);
+		re.setPaging(paging);
+		re.setSorting(sorting);
+		re.setCommit(commit);
+		re.setAt(timestamp(at));
+		publisher.publishEvent(re);
+		return handle(re);
+	}
+
 	// +------------- PROPERTY METHODS ------------------+
 
 	@Operation(summary = "Updates an object property with the given information.", tags = { TAG_PROPERTIES })
@@ -425,7 +513,7 @@ public class GenericRestController {
 					schema = @Schema(implementation = String.class)) //
 			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_NAME_NAME, required = true) String name, //
 
-			@Parameter(description = "Property names. Separated with ','.") //
+			@Parameter(description = "Property names. Separated by ';'.") //
 			@Nullable @RequestParam(name = "properties", required = false) String properties, //
 
 			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
@@ -439,6 +527,56 @@ public class GenericRestController {
 		re.setEntity(entity);
 		re.setName(name);
 		re.setProperties(properties);
+		re.setCommit(commit);
+		re.setAt(timestamp(at));
+		publisher.publishEvent(re);
+		return handle(re);
+	}
+
+	@Operation(summary = "Properties for entities mapping.", tags = { TAG_PROPERTIES })
+	@Tag(name = GenericRestController.TAG_PROPERTIES, description = TAG_PROPERTIES_DESCRIPTION)
+	@ApiResponses(value = { //
+			@ApiResponse(responseCode = "200", description = "On success request.", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							schema = @Schema(implementation = Object.class)) }), //
+			@ApiResponse(responseCode = "4XX", description = "On read errors.", //
+					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
+							schema = @Schema(implementation = ApiFailure.class)) }) //
+	})
+	@GetMapping(value = "/{entity}/" + PATH_PROPERTIES, //
+			produces = { MediaType.APPLICATION_JSON_VALUE } //
+	)
+	public ResponseEntity<Map<String, Map<String, Object>>> properties(//
+			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
+					schema = @Schema(implementation = String.class)) //
+			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
+
+			@Parameter(description = "Property names. Separated by ';'.") //
+			@Nullable @RequestParam(name = "properties", required = false) String properties, //
+
+			@Parameter(description = PARAMETER_FILTER_DESCRIPTION, //
+					example = PARAMETER_FILTER_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_FILTER_NAME, required = false) String filter, //
+
+			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging, //
+
+			@Parameter(description = PARAMETER_SORTING_DESCRIPTION, example = PARAMETER_SORTING_EXAMPLE) //
+			@Nullable @RequestParam(name = PARAMETER_SORTING_NAME, required = false) String sorting, //
+
+			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
+			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
+
+			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
+			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
+			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
+	) {
+		RestListPropertiesEvent<Map<String, Map<String, Object>>> re = new RestListPropertiesEvent<>(this);
+		re.setEntity(entity);
+		re.setProperties(properties);
+		re.setFilter(filter);
+		re.setPaging(paging);
+		re.setSorting(sorting);
 		re.setCommit(commit);
 		re.setAt(timestamp(at));
 		publisher.publishEvent(re);
@@ -794,142 +932,4 @@ public class GenericRestController {
 		return handle(re);
 	}
 
-	// +------------- COLLECTION METHODS ------------------+
-	@Operation(summary = "Count objects.", tags = { TAG_BASIC })
-	@Tag(name = GenericRestController.TAG_BASIC, description = TAG_BASIC_DESCRIPTION)
-	@ApiResponses(value = { //
-			@ApiResponse(responseCode = "200", description = "On success request.", //
-					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
-							schema = @Schema(implementation = WrapperVO.class)) }), //
-			@ApiResponse(responseCode = "4XX", description = "On read errors.", //
-					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
-							schema = @Schema(implementation = ApiFailure.class)) }) //
-	})
-	@GetMapping(value = "/{entity}/count", //
-			produces = { MediaType.APPLICATION_JSON_VALUE } //
-	)
-	public ResponseEntity<WrapperVO<Long>> count(//
-			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
-					schema = @Schema(implementation = String.class)) //
-			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
-
-			@Parameter(description = PARAMETER_FILTER_DESCRIPTION, //
-					example = PARAMETER_FILTER_EXAMPLE) //
-			@Nullable @RequestParam(name = PARAMETER_FILTER_NAME, required = false) String filter, //
-
-			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
-			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging, //
-
-			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
-			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
-
-			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
-			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
-	) {
-		RestCountEvent<WrapperVO<Long>> re = new RestCountEvent<>(this);
-		re.setEntity(entity);
-		re.setFilter(filter);
-		re.setPaging(paging);
-		re.setCommit(commit);
-		re.setAt(timestamp(at));
-		publisher.publishEvent(re);
-		return handle(re);
-	}
-
-	@Operation(summary = "List objects.", tags = { TAG_BASIC })
-	@Tag(name = GenericRestController.TAG_BASIC, description = TAG_BASIC_DESCRIPTION)
-	@ApiResponses(value = { //
-			@ApiResponse(responseCode = "200", description = "", //
-					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
-							array = @ArraySchema(schema = @Schema(implementation = Object.class))) }), //
-			@ApiResponse(responseCode = "4XX", description = "On read errors.", //
-					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
-							schema = @Schema(implementation = ApiFailure.class)) }) //
-	})
-	@GetMapping(value = "/{entity}/list", //
-			produces = { MediaType.APPLICATION_JSON_VALUE } //
-	)
-	public ResponseEntity<List<Object>> list(//
-			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
-					schema = @Schema(implementation = String.class)) //
-			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
-
-			@Parameter(description = PARAMETER_FILTER_DESCRIPTION, //
-					example = PARAMETER_FILTER_EXAMPLE) //
-			@Nullable @RequestParam(name = PARAMETER_FILTER_NAME, required = false) String filter, //
-
-			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
-			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging, //
-
-			@Parameter(description = PARAMETER_SORTING_DESCRIPTION, example = PARAMETER_SORTING_EXAMPLE) //
-			@Nullable @RequestParam(name = PARAMETER_SORTING_NAME, required = false) String sorting, //
-
-			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
-			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
-
-			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
-			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
-	) {
-		RestListEvent<List<Object>> re = new RestListEvent<>(this);
-		re.setEntity(entity);
-		re.setFilter(filter);
-		re.setPaging(paging);
-		re.setSorting(sorting);
-		re.setCommit(commit);
-		re.setAt(timestamp(at));
-		publisher.publishEvent(re);
-		return handle(re);
-	}
-
-	@Operation(summary = "Properties for entities mapping.", tags = { TAG_PROPERTIES })
-	@Tag(name = GenericRestController.TAG_PROPERTIES, description = TAG_PROPERTIES_DESCRIPTION)
-	@ApiResponses(value = { //
-			@ApiResponse(responseCode = "200", description = "On success request.", //
-					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
-							schema = @Schema(implementation = Object.class)) }), //
-			@ApiResponse(responseCode = "4XX", description = "On read errors.", //
-					content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, //
-							schema = @Schema(implementation = ApiFailure.class)) }) //
-	})
-	@GetMapping(value = "/{entity}/" + PATH_PROPERTIES, //
-			produces = { MediaType.APPLICATION_JSON_VALUE } //
-	)
-	public ResponseEntity<Map<String, Map<String, Object>>> properties(//
-			@Parameter(description = PATH_ENTITY_TYPE_DESCRIPTION, required = true, //
-					schema = @Schema(implementation = String.class)) //
-			@Valid @NotBlank @PathVariable(name = PATH_ENTITY_TYPE_NAME, required = true) String entity, //
-
-			@Parameter(description = "Property names. Separated with ','.") //
-			@Nullable @RequestParam(name = "properties", required = false) String properties, //
-
-			@Parameter(description = PARAMETER_FILTER_DESCRIPTION, //
-					example = PARAMETER_FILTER_EXAMPLE) //
-			@Nullable @RequestParam(name = PARAMETER_FILTER_NAME, required = false) String filter, //
-
-			@Parameter(description = PARAMETER_PAGINATION_DESCRIPTION, example = PARAMETER_PAGINATION_EXAMPLE) //
-			@Nullable @RequestParam(name = PARAMETER_PAGING_NAME, required = false) String paging, //
-
-			@Parameter(description = PARAMETER_SORTING_DESCRIPTION, example = PARAMETER_SORTING_EXAMPLE) //
-			@Nullable @RequestParam(name = PARAMETER_SORTING_NAME, required = false) String sorting, //
-
-			@Parameter(description = PARAMETER_COMMIT_DESCRIPTION) //
-			@Nullable @RequestParam(name = PARAMETER_COMMIT_NAME, required = false) String commit, //
-
-			@Parameter(description = PARAMETER_AT_DESCRIPTION) //
-			@Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) //
-			@RequestParam(name = PARAMETER_AT_NAME, required = false) LocalDateTime at //
-	) {
-		RestListPropertiesEvent<Map<String, Map<String, Object>>> re = new RestListPropertiesEvent<>(this);
-		re.setEntity(entity);
-		re.setProperties(properties);
-		re.setFilter(filter);
-		re.setPaging(paging);
-		re.setSorting(sorting);
-		re.setCommit(commit);
-		re.setAt(timestamp(at));
-		publisher.publishEvent(re);
-		return handle(re);
-	}
 }
