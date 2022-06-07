@@ -1,6 +1,8 @@
 package io.github.thiagolvlsantos.rest.storage.rest.history;
 
 import java.io.Serializable;
+import java.util.Date;
+import java.util.TimeZone;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,4 +19,6 @@ import lombok.experimental.SuperBuilder;
 public class HistoryIdent implements Serializable {
 	private String name;
 	private String emailAddress;
+	private Date when;
+	private TimeZone timeZone;
 }
