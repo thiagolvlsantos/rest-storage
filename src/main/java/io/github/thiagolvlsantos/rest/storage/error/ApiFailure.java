@@ -15,7 +15,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiFailure {
+@SuppressWarnings("serial")
+public class ApiFailure extends RuntimeException {
 
 	private HttpStatus status;
 	private LocalDateTime timestamp = LocalDateTime.now();
@@ -29,6 +30,8 @@ public class ApiFailure {
 		this.status = status;
 		this.message = message;
 		this.ex = ex;
-		this.debugMessage = ex.getLocalizedMessage();
+		if (ex != null) {
+			this.debugMessage = ex.getLocalizedMessage();
+		}
 	}
 }
