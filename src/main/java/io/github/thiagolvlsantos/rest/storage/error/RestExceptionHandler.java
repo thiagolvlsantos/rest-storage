@@ -23,6 +23,11 @@ public class RestExceptionHandler extends AbstractExceptionHandler {
 		return buildResponseEntity(new ApiFailure(HttpStatus.BAD_REQUEST, "Malformed JSON request.", ex));
 	}
 
+	@ExceptionHandler(ApiFailure.class)
+	protected ResponseEntity<Object> handleApiException(ApiFailure ex) {
+		return buildResponseEntity(ex);
+	}
+
 	@ExceptionHandler(Throwable.class)
 	protected ResponseEntity<Object> handleGenericException(Throwable ex) {
 		return buildResponseEntity(new ApiFailure(HttpStatus.BAD_REQUEST, ex.getMessage(), ex));
