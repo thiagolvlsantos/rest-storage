@@ -57,4 +57,4 @@ According to this setup, after server start, the OpenApi interface will be avail
 
 ## Build
 
-Localy, from this root directory call Maven commands or `bin/<script name>` at your will.
+Localy, from this root directory call Maven commands or `bin/<script name>` at your will...
