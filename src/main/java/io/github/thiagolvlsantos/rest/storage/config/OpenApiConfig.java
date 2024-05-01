@@ -13,7 +13,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 public class OpenApiConfig {
 
 	@Bean
-	public OpenAPI customOpenAPI() {
+	protected OpenAPI customOpenAPI() {
 		return new OpenAPI()
 				.components(new Components().addSecuritySchemes("basicScheme",
 						new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("basic")))
